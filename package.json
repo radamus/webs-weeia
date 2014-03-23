@@ -1,0 +1,26 @@
+{
+  "name": "webs-weeia",
+  "version": "0.0.1",
+  "description": "web service provider for aws laboratory based on express.js",
+  "main": "service.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/radamus/webs-weeia"
+  },
+  "keywords": [
+    "express",
+    "http"
+  ],
+  "author": "Radek Adamus  (https://github.com/radamus/)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/radamus/webs-weeia/issues"
+  },
+  "homepage": "https://github.com/radamus/webs-weeia",
+  "dependencies": {
+    "express": "^3.5.0"
+  }
+}
