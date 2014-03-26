@@ -6,19 +6,6 @@ var sendFile = function(path) {
 	}
 }
 
-var chainActions = function(action1, action2) {
-	return function(request, callback){
-		action1(request, function(err, result1, file) {
-			if(err) {callback(err); return;}
-			if(file) {callback(null,null, file); return;}
-			action2(request, function(err, result2, file){
-				if(err) {callback(err); return;}
-				if(file) {callback(null,null, file); return;}
-				callback(null, result1 + result2);
-			});
-		});
-	}
-}
 
 var service = function(requestProcessors){
 	var app = express();
@@ -26,9 +13,14 @@ var service = function(requestProcessors){
 	app.use(express.urlencoded());
 	
 	var handlers = {};	
-	for(var i = 0; i < requestProcessors.length; i ++){		
-		var action = (typeof(requestProcessors[i].action) == "function" ? requestProcessors[i].action : sendFile(requestProcessors[i].action));
-		handlers[requestProcessors[i].path] = (handlers[requestProcessors[i].path] ? chainActions(handlers[requestProcessors[i].path], action): action);
+	for(var i = 0; i < requestProcessors.length; i ++){	
+		var path = requestProcessors[i].path;		
+		var action = requestProcessors[i].action;
+		if(handlers[path]) {
+			throw new Error(path + " - duplicated path");
+		}
+		action = (typeof(action) == "function" ? action : sendFile(action));
+		handlers[path] = action;
 	}
 
 	Object.keys(handlers).forEach(function(key){
@@ -36,12 +28,21 @@ var service = function(requestProcessors){
 			console.log("request processing started");
 			handlers[key](request, function(err, result, file){
 				if(file){
+					if(file.template){
+						renderView(response, file.template, file.params);
+					} else {
 					response.sendfile(file);
+					}
 				}
 				else if(err) {
 						response.send("an error occured " + err);					
-				}else {	
-					response.send(result ? result : "");
+				}else {
+					var reqResponse = result ? result : "";
+					if(reqResponse.template){
+						renderView(response, reqResponse.template, reqResponse.params);
+					}else {
+						response.send(reqResponse);
+					}
 				}
 				console.log("request processing finished");					
 			});
@@ -54,4 +55,7 @@ var service = function(requestProcessors){
 	}
 }
 
+var renderView = function(response, template, params){
+	response.render(template, params);
+}
 exports.http = service;
