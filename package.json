@@ -1,6 +1,6 @@
 {
   "name": "webs-weeia",
-  "version": "0.0.2",
+  "version": "0.1.1",
   "description": "web service provider for aws laboratory based on express.js",
   "main": "service.js",
   "scripts": {
