@@ -40,7 +40,11 @@ var service = function(requestProcessors){
 						response.send("an error occured " + err);					
 				}else {
 					var reqResponse = result ? result : "";
-					if(reqResponse.template){
+					if(reqResponse.binary){
+						var file = reqResponse.filePath;
+  						response.download(file);
+					}
+					else if(reqResponse.template){
 						renderView(response, reqResponse.template, reqResponse.params);
 					}else {
 						response.send(reqResponse);
