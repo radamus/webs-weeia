@@ -64,7 +64,7 @@ var service = function(requestProcessors){
 var renderView = function(response, templateobj){
 	response.render(templateobj.template, templateobj.params);
 }
-exports.http = service;
+
 
 
 var isTemplate = function(obj){
@@ -77,3 +77,6 @@ var isDownload(obj){
  if (obj.binary) { return true;}
  return false;
 }
+
+
+module.exports.http = service;
