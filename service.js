@@ -29,18 +29,17 @@ var service = function(requestProcessors){
 		app.all(key, function(request, response){
 			console.log("request processing started");
 			handlers[key](request, function(err, result, file){
-				if(file){
+				if(err) {
+						response.send("an error occured " + err);					
+				}else if(file){
 					if(isTemplate(file)){
 						renderView(response, file);
 					} else {
-					response.sendfile(file);
+						response.sendfile(file);
 					}
-				}
-				else if(err) {
-						response.send("an error occured " + err);					
-				}else {
+				} else {
 					var reqResponse = result ? result : "";
-					if(isDownload(reqResponse){
+					if(isDownload(reqResponse)){
 						var file = reqResponse.filePath;
   						response.download(file);
 					}
@@ -73,7 +72,7 @@ var isTemplate = function(obj){
 	return false;
 }
 
-var isDownload(obj){
+var isDownload = function(obj){
  if (obj.binary) { return true;}
  return false;
 }
