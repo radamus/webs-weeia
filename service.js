@@ -30,8 +30,8 @@ var service = function(requestProcessors){
 			console.log("request processing started");
 			handlers[key](request, function(err, result, file){
 				if(file){
-					if(file.template){
-						renderView(response, file.template, file.params);
+					if(isTemplate(file)){
+						renderView(response, file);
 					} else {
 					response.sendfile(file);
 					}
@@ -40,12 +40,12 @@ var service = function(requestProcessors){
 						response.send("an error occured " + err);					
 				}else {
 					var reqResponse = result ? result : "";
-					if(reqResponse.binary){
+					if(isDownload(reqResponse){
 						var file = reqResponse.filePath;
   						response.download(file);
 					}
-					else if(reqResponse.template){
-						renderView(response, reqResponse.template, reqResponse.params);
+					else if(isTemplate(reqResponse)){
+						renderView(response, reqResponse);
 					}else {
 						response.send(reqResponse);
 					}
@@ -61,7 +61,19 @@ var service = function(requestProcessors){
 	}
 }
 
-var renderView = function(response, template, params){
-	response.render(template, params);
+var renderView = function(response, templateobj){
+	response.render(templateobj.template, templateobj.params);
 }
 exports.http = service;
+
+
+var isTemplate = function(obj){
+	if(obj.template) 
+		return true;
+	return false;
+}
+
+var isDownload(obj){
+ if (obj.binary) { return true;}
+ return false;
+}
