@@ -7,12 +7,9 @@ var sendFile = function(path) {
 }
 
 
-var service = function(requestProcessors){
-	var app = express();
-	app.use(express.json());
-	app.use(express.urlencoded());
-	app.use(express.methodOverride());
-    app.use(express.multipart());
+var service = function(requestProcessors, serviceProvider){
+	serviceProvider = serviceProvider || defaultServiceProvider;
+	var app = serviceProvider();
 	
 	var handlers = {};	
 	for(var i = 0; i < requestProcessors.length; i ++){	
@@ -64,8 +61,6 @@ var renderView = function(response, templateobj){
 	response.render(templateobj.template, templateobj.params);
 }
 
-
-
 var isTemplate = function(obj){
 	if(obj.template) 
 		return true;
@@ -77,5 +72,13 @@ var isDownload = function(obj){
  return false;
 }
 
+var serviceProvider = function(){
+	var app = express();
+	app.use(express.json());
+	app.use(express.urlencoded());
+	app.use(express.methodOverride());
+    app.use(express.multipart());
+    return app;
+}
 
 module.exports.http = service;
