@@ -4,7 +4,7 @@
   "description": "web service provider for aws laboratory based on express.js",
   "main": "service.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "mocha"
   },
   "repository": {
     "type": "git",
@@ -21,6 +21,7 @@
   },
   "homepage": "https://github.com/radamus/webs-weeia",
   "dependencies": {
-    "express": "^3.5.0"
+    "express": "^3.5.0",
+    "sinon": "^1.9.1"
   }
 }
