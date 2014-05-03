@@ -7,7 +7,7 @@ var ServiceProviderStub = function(){
 	this.all = function(path, action){
 		this.actions[path] = action;
 	};
-	this.listen = function(){};	
+	this.listen = function(){ };	
 	this.request =  function(path, params, response){
 		this.actions[path](params, response);
 	}
@@ -20,6 +20,15 @@ var ResponseStub = function(){
 	this.sendfile = sinon.mock().never();
 	this.send = sinon.mock().never();
 	this.download = sinon.mock().never();
+
+	this.verify = function(){
+		var self = this;
+		Object.keys(self).forEach(function(key){
+			if(self[key].verify){
+				self[key].verify();
+			}
+		});
+	}
 }
 
 var an = function(actionBuilder){
@@ -61,13 +70,15 @@ ActionBuilder.prototype.withTemplateAction = function(template, params){
 describe("service", function(){
 	var serviceProviderStub;
 	beforeEach(function(){
-		serviceProviderStub = new ServiceProviderStub();		
+		serviceProviderStub = new ServiceProviderStub();				
 	});
 
 	describe("on init http", function(){
+		
 		it("should not call 'all' function on empty action list", function(){
 			serviceProviderStub.all = sinon.mock().never();
 			service.http([], serviceProviderStub);
+			serviceProviderStub.all.verify();
 
 		});
 
@@ -78,7 +89,8 @@ describe("service", function(){
 		it("should return a function that call 'listen'", function(){
 			var port = 8080;
 			serviceProviderStub.listen = sinon.mock();
-			 service.http([], serviceProviderStub)(port);
+			service.http([], serviceProviderStub)(port);
+			serviceProviderStub.listen.verify();
 
 		});
 
@@ -102,6 +114,7 @@ describe("service", function(){
 		
 			serviceProviderStub.all = sinon.mock().twice();
 			service.http(actions, serviceProviderStub);
+			serviceProviderStub.all.verify();
 			
 		});
 
@@ -135,13 +148,15 @@ describe("service", function(){
 		});
 	});
 	describe("on request", function(){
+	
 		var response;
 		var path;
+		var port = 8080;
 
 		beforeEach(function(){			
-			response = new ResponseStub();
+			response = new ResponseStub();	
 			serviceProviderStub.listen = sinon.mock().once();
-			path = "/a1";
+			path = "/a1";			
 		});
 
 		it("should call sendFile once on file action", function(){			
@@ -149,10 +164,13 @@ describe("service", function(){
 			var actions = [ 
 			an(action().withPath(path).withFileAction(filePath))];
 			
-			service.http(actions, serviceProviderStub);
+			service.http(actions, serviceProviderStub)(port);
 			
 			response.sendfile = sinon.mock();
 			serviceProviderStub.request(path, {}, response);
+
+			serviceProviderStub.listen.verify();
+			response.verify();
 
 		});
 
@@ -161,10 +179,11 @@ describe("service", function(){
 			var actions = [ 
 			an(action().withPath(path).withTemplateAction(template, []))];
 			
-			service.http(actions, serviceProviderStub);
+			service.http(actions, serviceProviderStub)(port);
 			response.render = sinon.mock();
 			serviceProviderStub.request(path, {}, response);
-
+			serviceProviderStub.listen.verify();
+			response.verify();
 		});
 
 	})
