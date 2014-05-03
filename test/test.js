@@ -3,12 +3,21 @@ var service = require("../service");
 var sinon = require("sinon");
 
 var ServiceProviderStub = function(){
-	this.all = function(){};
-	this.listen = function(){};
+	this.actions = {};
+	this.all = function(path, action){
+		this.actions[path] = action;
+	};
+	this.listen = function(){};	
+	this.request =  function(path, params, response){
+		this.actions[path](params, response);
+	}
+	
+
 }
-ServiceProviderStub.Response = function(){
-	this.renderView = function(){}
-	this.sendFile = function(){}
+
+var ResponseStub = function(){
+	this.render = function(){}
+	this.sendfile = function(){}
 	this.send = function(){}
 	this.download = function(){}
 }
@@ -39,6 +48,15 @@ ActionBuilder.prototype.withFunctionalAction = function(action){
 	return this;
 }
 
+ActionBuilder.prototype.withFileAction = function(path){
+	this.action.action = path;
+	return this;
+}
+
+ActionBuilder.prototype.withTemplateAction = function(template, params){
+	this.action.action = {template:template, params:params};
+	return this;
+}
 
 describe("service", function(){
 	var serviceProviderStub;
@@ -93,6 +111,37 @@ describe("service", function(){
 
 		});
 	});
+	describe("on request", function(){
+		var response;
+		beforeEach(function(){			
+			response = new ResponseStub();
+		});
+
+		it("should call sendFile once on file action", function(){
+			var path = "/a1";
+			var filePath = "sampleFilePath";
+			var actions = [ 
+			an(action().withPath(path).withFileAction(filePath))];
+			
+			service.http(actions, serviceProviderStub);
+			response.sendfile = sinon.mock();
+			serviceProviderStub.request(path, {}, response);
+
+		});
+
+		it("should call render once on template action", function(){
+			var path = "/a1";
+			var template = "sampleTemplatePath";
+			var actions = [ 
+			an(action().withPath(path).withTemplateAction(template, []))];
+			
+			service.http(actions, serviceProviderStub);
+			response.render = sinon.mock();
+			serviceProviderStub.request(path, {}, response);
+
+		});
+
+	})
 	
 })
 

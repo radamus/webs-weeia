@@ -8,9 +8,8 @@ var sendFile = function(path) {
 
 
 var service = function(requestProcessors, serviceProvider){
-	serviceProvider = serviceProvider || defaultServiceProvider();
-	var app = serviceProvider;
-	
+	var app = serviceProvider || defaultServiceProvider();
+		
 	var handlers = {};	
 	for(var i = 0; i < requestProcessors.length; i ++){	
 		var path = requestProcessors[i].path;		
