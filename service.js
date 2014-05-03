@@ -8,8 +8,8 @@ var sendFile = function(path) {
 
 
 var service = function(requestProcessors, serviceProvider){
-	serviceProvider = serviceProvider || defaultServiceProvider;
-	var app = serviceProvider();
+	serviceProvider = serviceProvider || defaultServiceProvider();
+	var app = serviceProvider;
 	
 	var handlers = {};	
 	for(var i = 0; i < requestProcessors.length; i ++){	
@@ -18,11 +18,14 @@ var service = function(requestProcessors, serviceProvider){
 		if(handlers[path]) {
 			throw new Error(path + " - duplicated path");
 		}
+		if(!action){ 
+			throw new Error("no action defined for " + path);
+		}
 		action = (typeof(action) == "function" ? action : sendFile(action));
 		handlers[path] = action;
 	}
 
-	Object.keys(handlers).forEach(function(key){
+	Object.keys(handlers).forEach(function(key){		
 		app.all(key, function(request, response){
 			console.log("request processing started");
 			handlers[key](request, function(err, result, file){
@@ -72,7 +75,7 @@ var isDownload = function(obj){
  return false;
 }
 
-var serviceProvider = function(){
+var defaultServiceProvider = function(){
 	var app = express();
 	app.use(express.json());
 	app.use(express.urlencoded());
