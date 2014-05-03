@@ -16,10 +16,10 @@ var ServiceProviderStub = function(){
 }
 
 var ResponseStub = function(){
-	this.render = function(){}
-	this.sendfile = function(){}
-	this.send = function(){}
-	this.download = function(){}
+	this.render = sinon.mock().never();
+	this.sendfile = sinon.mock().never();
+	this.send = sinon.mock().never();
+	this.download = sinon.mock().never();
 }
 
 var an = function(actionBuilder){
@@ -64,10 +64,33 @@ describe("service", function(){
 		serviceProviderStub = new ServiceProviderStub();		
 	});
 
-	describe("on init", function(){
+	describe("on init http", function(){
 		it("should not call 'all' function on empty action list", function(){
 			serviceProviderStub.all = sinon.mock().never();
 			service.http([], serviceProviderStub);
+
+		});
+
+		it("should return a function", function(){			
+			assert( service.http([], serviceProviderStub) instanceof Function);
+		});
+
+		it("should return a function that call 'listen'", function(){
+			var port = 8080;
+			serviceProviderStub.listen = sinon.mock();
+			 service.http([], serviceProviderStub)(port);
+
+		});
+
+		it("should throw an exception on undefined listen port ", function(){
+			var http = service.http([], serviceProviderStub);
+			try{
+				http();
+			}catch(e){
+				assert(true);
+				return;
+			}
+			assert(false);
 
 		});
 
@@ -113,24 +136,27 @@ describe("service", function(){
 	});
 	describe("on request", function(){
 		var response;
+		var path;
+
 		beforeEach(function(){			
 			response = new ResponseStub();
+			ServiceProviderStub.listen = sinon.mock().once();
+			path = "/a1";
 		});
 
-		it("should call sendFile once on file action", function(){
-			var path = "/a1";
+		it("should call sendFile once on file action", function(){			
 			var filePath = "sampleFilePath";
 			var actions = [ 
 			an(action().withPath(path).withFileAction(filePath))];
 			
 			service.http(actions, serviceProviderStub);
+			
 			response.sendfile = sinon.mock();
 			serviceProviderStub.request(path, {}, response);
 
 		});
 
-		it("should call render once on template action", function(){
-			var path = "/a1";
+		it("should call render once on template action", function(){			
 			var template = "sampleTemplatePath";
 			var actions = [ 
 			an(action().withPath(path).withTemplateAction(template, []))];
