@@ -140,7 +140,7 @@ describe("service", function(){
 
 		beforeEach(function(){			
 			response = new ResponseStub();
-			ServiceProviderStub.listen = sinon.mock().once();
+			serviceProviderStub.listen = sinon.mock().once();
 			path = "/a1";
 		});
 
