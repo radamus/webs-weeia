@@ -55,7 +55,7 @@ var service = function(requestProcessors, serviceProvider){
 
 	return function(port){
 		if(!port) throw new Exception(" no port number provided ");
-		console.log(port);
+		console.log("listening on port: " +port);
 		app.listen(port);		
 	}
 }

@@ -153,6 +153,7 @@ describe("service", function(){
 		var path;
 		var port = 8080;
 
+
 		beforeEach(function(){			
 			response = new ResponseStub();	
 			serviceProviderStub.listen = sinon.mock().once();
@@ -169,7 +170,7 @@ describe("service", function(){
 			response.sendfile = sinon.mock();
 			serviceProviderStub.request(path, {}, response);
 
-			serviceProviderStub.listen.verify();
+			
 			response.verify();
 
 		});
@@ -182,9 +183,57 @@ describe("service", function(){
 			service.http(actions, serviceProviderStub)(port);
 			response.render = sinon.mock();
 			serviceProviderStub.request(path, {}, response);
-			serviceProviderStub.listen.verify();
+			
 			response.verify();
 		});
+
+		it("should call action callback once on functional action", function(){			
+			var actionCallback = sinon.mock();
+			
+			var actions = [ 
+			an(action().withPath(path).withFunctionalAction(actionCallback))];
+			
+			service.http(actions, serviceProviderStub)(port);
+						
+			serviceProviderStub.request(path, {}, response);
+			
+			actionCallback.verify();
+			response.verify();
+
+		});
+
+		it("should call provider 'send' on callback from functional action with string result", function(){	
+
+			var errorResult = "error reponse";
+			var errorResponse = "an error occured " + errorResult;
+			var actionCallback = sinon.mock().callsArgWith(1, errorResult);
+			
+			var actions = [ 
+			an(action().withPath(path).withFunctionalAction(actionCallback))];
+			
+			service.http(actions, serviceProviderStub)(port);
+			response.send = sinon.mock().withExactArgs(errorResponse);			
+			serviceProviderStub.request(path, {}, response);
+					
+			response.verify();
+
+		});
+
+		it("should call providee 'send' on callback from functional action with string result", function(){			
+			var resultResponse = "simple reponse";
+			var actionCallback = sinon.mock().callsArgWith(1, null, resultResponse);
+			
+			var actions = [ 
+			an(action().withPath(path).withFunctionalAction(actionCallback))];
+			
+			service.http(actions, serviceProviderStub)(port);
+			response.send = sinon.mock().withExactArgs(resultResponse);			
+			serviceProviderStub.request(path, {}, response);
+					
+			response.verify();
+
+		});
+
 
 	})
 	
