@@ -53,9 +53,13 @@ var service = function(requestProcessors, serviceProvider){
 		});
 	});
 
-	return function(port){
+	return function(port, settings){
 		if(!port) throw new Exception(" no port number provided ");
+		Object.keys(settings).forEach(function(key){
+			app.set(key, settings[key]);
+		});
 		console.log("listening on port: " +port);
+
 		app.listen(port);		
 	}
 }
@@ -80,7 +84,7 @@ var defaultServiceProvider = function(){
 	app.use(express.json());
 	app.use(express.urlencoded());
 	app.use(express.methodOverride());
-    app.use(express.multipart());
+    app.use(express.multipart());    
     return app;
 }
 
