@@ -219,7 +219,7 @@ describe("service", function(){
 
 		});
 
-		it("should call providee 'send' on callback from functional action with string result", function(){			
+		it("should call provider 'send' on callback from functional action with string result", function(){			
 			var resultResponse = "simple reponse";
 			var actionCallback = sinon.mock().callsArgWith(1, null, resultResponse);
 			
@@ -228,6 +228,21 @@ describe("service", function(){
 			
 			service.http(actions, serviceProviderStub)(port);
 			response.send = sinon.mock().withExactArgs(resultResponse);			
+			serviceProviderStub.request(path, {}, response);
+					
+			response.verify();
+
+		});
+
+		it("should call provider 'render' on callback from functional action with template", function(){			
+			var templateResponse = {template:"template path", params:[]};
+			var actionCallback = sinon.mock().callsArgWith(1, null, templateResponse);
+			
+			var actions = [ 
+			an(action().withPath(path).withFunctionalAction(actionCallback))];
+			
+			service.http(actions, serviceProviderStub)(port);
+			response.render = sinon.mock().withExactArgs(templateResponse.template, templateResponse.params);			
 			serviceProviderStub.request(path, {}, response);
 					
 			response.verify();
